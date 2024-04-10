@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.LayoutDirection
 fun SelectArea(
     text1: String,
     text2: String? = null,
-    onForwardClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onForwardClick: () -> Unit
 ) {
-    CompositionLocalProvider(value = LocalLayoutDirection provides LayoutDirection.Ltr) {
+    CompositionLocalProvider(value = LocalLayoutDirection provides LayoutDirection.Rtl) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -33,23 +33,23 @@ fun SelectArea(
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowBack,
-                    contentDescription = "back"
+                    imageVector = Icons.Rounded.ArrowForward,
+                    contentDescription = "back",
                 )
             }
-            Text(text = text1)
             text2?.let {
                 Text(
                     text = it,
                     style = TextStyle(textDirection = TextDirection.Rtl)
                 )
             }
+            Text(text = text1)
             IconButton(
                 onClick = onForwardClick,
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowForward,
-                    contentDescription = "forward",
+                    imageVector = Icons.Rounded.ArrowBack,
+                    contentDescription = "forward"
                 )
             }
         }

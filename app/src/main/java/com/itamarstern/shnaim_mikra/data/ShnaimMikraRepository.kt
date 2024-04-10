@@ -9,15 +9,27 @@ class ShnaimMikraRepository @Inject constructor(
     private val apiService: ApiService
 ) {
 
-    suspend fun getBook(name: String): Book {
-        return apiService.getBook(name)
+    suspend fun getBook(name: String): Result<Book> {
+        return try {
+            Result.success(apiService.getBook(name))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    suspend fun getAliya(ref: String): Aliya {
-        return apiService.getAliya(ref)
+    suspend fun getAliya(ref: String): Result<Aliya> {
+        return try {
+            Result.success(apiService.getAliya(ref))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    suspend fun getOnkelos(ref: String): Aliya {
-        return apiService.getAliya("Onkelos $ref")
+    suspend fun getOnkelos(ref: String): Result<Aliya> {
+        return try {
+            Result.success(apiService.getAliya("Onkelos $ref"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

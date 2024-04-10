@@ -56,9 +56,17 @@ class MainViewModel @Inject constructor(
 
     private fun fetchBook(index: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            book = repository.getBook(humashs[index])
+            val result = (repository.getBook(humashs[index]))
+            if (result.isSuccess) book = result.getOrNull()
+            else onFetchFailure()
             updateBookName()
             fetchAliya()
+        }
+    }
+
+    private fun onFetchFailure() {
+        _uiState.update {  state ->
+            state.copy(state = UiState.State.Failure)
         }
     }
 
@@ -78,22 +86,24 @@ class MainViewModel @Inject constructor(
         text.addAll(makeAliyaText.makeText(onkelos!!.versions[0].text, ref))
         _uiState.update {
             it.copy(
-                aliyaText = text
+                aliyaText = text,
+                state = UiState.State.Fetched
             )
         }
     }
 
     private fun fetchAliya() {
         viewModelScope.launch(Dispatchers.IO) {
-            aliya = repository.getAliya(ref)
-            onkelos = repository.getOnkelos(ref)
-            updateAliya()
+            val aliyaResult = repository.getAliya(ref)
+            val onkelosResult = repository.getOnkelos(ref)
+            if (aliyaResult.isFailure || onkelosResult.isFailure) {
+                onFetchFailure()
+            } else {
+                aliya = aliyaResult.getOrNull()
+                onkelos = onkelosResult.getOrNull()
+                updateAliya()
+            }
         }
-    }
-
-    fun onBookBackClick() {
-        if (bookIndex < 4) bookIndex++
-        resetParasha()
     }
 
     private fun saveAliyaDetails() {
@@ -102,22 +112,65 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onBookForwardClick() {
-        if (bookIndex > 0) bookIndex--
-        resetParasha()
+    private fun onLoading() {
+        _uiState.update { state ->
+            state.copy(state = UiState.State.Loading)
+        }
     }
 
-    fun onParashaBackClick() {
-        if (parashaIndex < parashas[bookIndex].size - 1) {
-            parashaIndex++
-            resetAliya()
+    fun onBookForwardClick() {
+        if (bookIndex < 4) {
+            onLoading()
+            bookIndex++
+            resetParasha()
+        }
+    }
+
+    fun onBookBackClick() {
+        if (bookIndex > 0) {
+            onLoading()
+            bookIndex--
+            resetParasha()
         }
     }
 
     fun onParashaForwardClick() {
+        if (parashaIndex < parashas[bookIndex].size - 1) {
+            onLoading()
+            parashaIndex++
+            resetAliya()
+        } else {
+            onBookForwardClick()
+        }
+    }
+
+    fun onParashaBackClick() {
         if (parashaIndex > 0) {
+            onLoading()
             parashaIndex--
             resetAliya()
+        } else {
+            onBookBackClick()
+        }
+    }
+
+    fun onAliyaForwardClick() {
+        if (aliyaIndex < aliyas.size - 1) {
+            onLoading()
+            aliyaIndex++
+            saveAliyaDetails()
+        } else {
+            onParashaForwardClick()
+        }
+    }
+
+    fun onAliyaBackClick() {
+        if (aliyaIndex > 0) {
+            onLoading()
+            aliyaIndex--
+            saveAliyaDetails()
+        } else {
+            onParashaBackClick()
         }
     }
 
@@ -125,6 +178,14 @@ class MainViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 parashaName = parashas[bookIndex][parashaIndex]
+            )
+        }
+    }
+
+    private fun updateAliyaName() {
+        _uiState.update {
+            it.copy(
+                aliyaName = aliyas[aliyaIndex]
             )
         }
     }
@@ -139,28 +200,6 @@ class MainViewModel @Inject constructor(
         saveAliyaDetails()
     }
 
-    fun onAliyaBackClick() {
-        if (aliyaIndex < aliyas.size - 1) {
-            aliyaIndex++
-            saveAliyaDetails()
-        }
-    }
-
-    fun onAliyaForwardClick() {
-        if (aliyaIndex > 0) {
-            aliyaIndex--
-            saveAliyaDetails()
-        }
-    }
-
-    private fun updateAliyaName() {
-        _uiState.update {
-            it.copy(
-                aliyaName = aliyas[aliyaIndex]
-            )
-        }
-    }
-
     data class UiState (
         var bookName: String = "",
         var parashaName: String = "",
@@ -169,7 +208,7 @@ class MainViewModel @Inject constructor(
         var state: State = State.Loading
     ) {
         enum class State {
-            Loading, Fetched
+            Loading, Fetched, Failure
         }
     }
 }
