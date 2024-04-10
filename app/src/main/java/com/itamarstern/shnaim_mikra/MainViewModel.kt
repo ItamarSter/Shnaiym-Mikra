@@ -7,6 +7,7 @@ import com.itamarstern.shnaim_mikra.data.ShnaimMikraRepository
 import com.itamarstern.shnaim_mikra.data.aliyas
 import com.itamarstern.shnaim_mikra.data.humashs
 import com.itamarstern.shnaim_mikra.data.parashas
+import com.itamarstern.shnaim_mikra.local.DataStoreRepository
 import com.itamarstern.shnaim_mikra.module.StyledText
 import com.itamarstern.shnaim_mikra.module.aliya.Aliya
 import com.itamarstern.shnaim_mikra.utils.MakeAliyaTextUseCase
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: ShnaimMikraRepository,
-    private val makeAliyaText: MakeAliyaTextUseCase
+    private val makeAliyaText: MakeAliyaTextUseCase,
+    private val userPreferences: DataStoreRepository
 ): ViewModel() {
 
     private var bookIndex = 0
@@ -38,14 +40,25 @@ class MainViewModel @Inject constructor(
     private val ref get() = book?.altStructs?.Parasha?.nodes?.get(parashaIndex)?.refs?.get(aliyaIndex)!!
 
     init {
-        fetchBook(0)
+        viewModelScope.launch {
+            userPreferences.getAliyaDetailsFlow().collect {
+                val indexes = it.split(',')
+                bookIndex = indexes[0].toInt()
+                parashaIndex = indexes[1].toInt()
+                aliyaIndex = indexes[2].toInt()
+                fetchBook(bookIndex)
+                updateBookName()
+                updateParashaName()
+                updateAliyaName()
+            }
+        }
     }
 
     private fun fetchBook(index: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             book = repository.getBook(humashs[index])
             updateBookName()
-            updateParashaName()
+            fetchAliya()
         }
     }
 
@@ -56,8 +69,6 @@ class MainViewModel @Inject constructor(
     //                    state = UiState.State.Fetched
             )
         }
-
-        resetParashaName()
     }
 
     private fun updateAliya() {
@@ -82,24 +93,32 @@ class MainViewModel @Inject constructor(
 
     fun onBookBackClick() {
         if (bookIndex < 4) bookIndex++
-        fetchBook(bookIndex)
+        resetParasha()
+    }
+
+    private fun saveAliyaDetails() {
+        viewModelScope.launch {
+            userPreferences.setAliyaDetails(bookIndex, parashaIndex, aliyaIndex)
+        }
     }
 
     fun onBookForwardClick() {
         if (bookIndex > 0) bookIndex--
-        fetchBook(bookIndex)
+        resetParasha()
     }
 
     fun onParashaBackClick() {
-        book ?: return
-        if (parashaIndex < book!!.altStructs?.Parasha?.nodes?.size!! - 1) parashaIndex++
-        updateParashaName()
+        if (parashaIndex < parashas[bookIndex].size - 1) {
+            parashaIndex++
+            resetAliya()
+        }
     }
 
     fun onParashaForwardClick() {
-        book ?: return
-        if (parashaIndex > 0) parashaIndex--
-        updateParashaName()
+        if (parashaIndex > 0) {
+            parashaIndex--
+            resetAliya()
+        }
     }
 
     private fun updateParashaName() {
@@ -108,30 +127,30 @@ class MainViewModel @Inject constructor(
                 parashaName = parashas[bookIndex][parashaIndex]
             )
         }
-
-        resetAliyaName()
     }
 
-    private fun resetParashaName() {
+    private fun resetParasha() {
         parashaIndex = 0
-        updateParashaName()
+        resetAliya()
     }
 
-    private fun resetAliyaName() {
+    private fun resetAliya() {
         aliyaIndex = 0
-        updateAliyaName()
+        saveAliyaDetails()
     }
 
     fun onAliyaBackClick() {
-        book ?: return
-        if (aliyaIndex < aliyas.size - 1) aliyaIndex++
-        updateAliyaName()
+        if (aliyaIndex < aliyas.size - 1) {
+            aliyaIndex++
+            saveAliyaDetails()
+        }
     }
 
     fun onAliyaForwardClick() {
-        book ?: return
-        if (aliyaIndex > 0) aliyaIndex--
-        updateAliyaName()
+        if (aliyaIndex > 0) {
+            aliyaIndex--
+            saveAliyaDetails()
+        }
     }
 
     private fun updateAliyaName() {
@@ -140,8 +159,6 @@ class MainViewModel @Inject constructor(
                 aliyaName = aliyas[aliyaIndex]
             )
         }
-
-        fetchAliya()
     }
 
     data class UiState (
