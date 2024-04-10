@@ -52,6 +52,13 @@ class MainViewModel @Inject constructor(
                 updateAliyaName()
             }
         }
+        viewModelScope.launch {
+            userPreferences.getFontSizeFlow().collect {
+                _uiState.update { state ->
+                    state.copy(fontSize = it)
+                }
+            }
+        }
     }
 
     private fun fetchBook(index: Int) {
@@ -200,7 +207,22 @@ class MainViewModel @Inject constructor(
         saveAliyaDetails()
     }
 
+    fun onIncreaseFontClick() {
+        viewModelScope.launch {
+            if (uiState.value.fontSize < DataStoreRepository.MAX_FONT_SIZE)
+                userPreferences.setFontSize(uiState.value.fontSize + 1)
+        }
+    }
+
+    fun onDecreaseFontClick() {
+        viewModelScope.launch {
+            if (uiState.value.fontSize > DataStoreRepository.MIN_FONT_SIZE)
+                userPreferences.setFontSize(uiState.value.fontSize - 1)
+        }
+    }
+
     data class UiState (
+        var fontSize: Int = DataStoreRepository.DEFAULT_FONT_SIZE,
         var bookName: String = "",
         var parashaName: String = "",
         var aliyaName: String = "",

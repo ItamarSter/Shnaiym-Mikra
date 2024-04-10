@@ -9,13 +9,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import com.itamarstern.shnaim_mikra.module.StyledText
 
 @Composable
-fun MultiStylesText(modifier: Modifier = Modifier, textData: ArrayList<StyledText>) {
+fun MultiStylesText(
+    modifier: Modifier = Modifier,
+    textData: ArrayList<StyledText>,
+    textSize: Int
+) {
     Text(
         modifier = modifier,
-        style = TextStyle(textDirection = TextDirection.Rtl),
+        style = TextStyle(textDirection = TextDirection.Rtl, fontSize = textSize.sp),
         text = buildAnnotatedString {
             textData.forEach { styledText ->
                 if (styledText.bold) {
