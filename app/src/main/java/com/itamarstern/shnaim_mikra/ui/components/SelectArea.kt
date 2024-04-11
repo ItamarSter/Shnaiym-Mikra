@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 
 @Composable
 fun SelectArea(
+    modifier: Modifier = Modifier,
     text1: String,
     text2: String? = null,
     onBackClick: () -> Unit,
@@ -29,7 +30,7 @@ fun SelectArea(
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
