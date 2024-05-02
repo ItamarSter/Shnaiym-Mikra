@@ -29,24 +29,21 @@ class MainViewModel @Inject constructor(
     private var bookIndex = 0
     private var parashaIndex = 0
     private var aliyaIndex = 0
+    private var isConnectedParashas = false
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState
 
-    private var book: Book? = null
-    private var aliya: Aliya? = null
-    private var onkelos: Aliya? = null
-
-    private val ref get() = book?.altStructs?.Parasha?.nodes?.get(parashaIndex)?.refs?.get(aliyaIndex)!!
-
     init {
         viewModelScope.launch {
             userPreferences.getAliyaDetailsFlow().collect {
-                val indexes = it.split(',')
-                bookIndex = indexes[0].toInt()
-                parashaIndex = indexes[1].toInt()
-                aliyaIndex = indexes[2].toInt()
-                fetchBook(bookIndex)
+                val details = it.split(',')
+                bookIndex = details[0].toInt()
+                parashaIndex = details[1].toInt()
+                aliyaIndex = details[2].toInt()
+
+                updateAliya()
+
                 updateBookName()
                 updateParashaName()
                 updateAliyaName()
@@ -61,55 +58,20 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun fetchBook(index: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = (repository.getBook(humashs[index]))
-            if (result.isSuccess) book = result.getOrNull()
-            else onFetchFailure()
-            updateBookName()
-            fetchAliya()
-        }
-    }
-
-    private fun onFetchFailure() {
-        _uiState.update {  state ->
-            state.copy(state = UiState.State.Failure)
+    private fun updateAliya() {
+        _uiState.update { state ->
+            state.copy(
+                aliyaText = makeAliyaText.makeText(bookIndex, parashaIndex, aliyaIndex),
+                state = UiState.State.Fetched
+            )
         }
     }
 
     private fun updateBookName() {
         _uiState.update {
             it.copy(
-                bookName = humashs[bookIndex],
-    //                    state = UiState.State.Fetched
+                bookName = humashs[bookIndex]
             )
-        }
-    }
-
-    private fun updateAliya() {
-        val text = ArrayList<StyledText>()
-        text.addAll(makeAliyaText.makeText(aliya!!.versions[0].text, ref))
-        text.add(StyledText("\n\nתרגום\n", true))
-        text.addAll(makeAliyaText.makeText(onkelos!!.versions[0].text, ref))
-        _uiState.update {
-            it.copy(
-                aliyaText = text,
-                state = UiState.State.Fetched
-            )
-        }
-    }
-
-    private fun fetchAliya() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val aliyaResult = repository.getAliya(ref)
-            val onkelosResult = repository.getOnkelos(ref)
-            if (aliyaResult.isFailure || onkelosResult.isFailure) {
-                onFetchFailure()
-            } else {
-                aliya = aliyaResult.getOrNull()
-                onkelos = onkelosResult.getOrNull()
-                updateAliya()
-            }
         }
     }
 
@@ -184,7 +146,8 @@ class MainViewModel @Inject constructor(
     private fun updateParashaName() {
         _uiState.update {
             it.copy(
-                parashaName = parashas[bookIndex][parashaIndex]
+                parashaName = if (isConnectedParashas) parashas[bookIndex][parashaIndex].nameIfConnected else parashas[bookIndex][parashaIndex].name,
+                parasha = parashas[bookIndex][parashaIndex]
             )
         }
     }
@@ -226,6 +189,7 @@ class MainViewModel @Inject constructor(
         var bookName: String = "",
         var parashaName: String = "",
         var aliyaName: String = "",
+        var parasha: Parasha? = null,
         var aliyaText: ArrayList<StyledText> = arrayListOf(),
         var state: State = State.Loading
     ) {
