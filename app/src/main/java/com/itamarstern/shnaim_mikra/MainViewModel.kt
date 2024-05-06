@@ -2,17 +2,15 @@ package com.itamarstern.shnaim_mikra
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itamarstern.shnaim_mikra.module.book.Book
-import com.itamarstern.shnaim_mikra.data.ShnaimMikraRepository
+import com.itamarstern.shnaim_mikra.data.Parasha
 import com.itamarstern.shnaim_mikra.data.aliyas
 import com.itamarstern.shnaim_mikra.data.humashs
 import com.itamarstern.shnaim_mikra.data.parashas
 import com.itamarstern.shnaim_mikra.local.DataStoreRepository
+import com.itamarstern.shnaim_mikra.local.SharedPreferencesRepository
 import com.itamarstern.shnaim_mikra.module.StyledText
-import com.itamarstern.shnaim_mikra.module.aliya.Aliya
 import com.itamarstern.shnaim_mikra.utils.MakeAliyaTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -21,14 +19,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: ShnaimMikraRepository,
     private val makeAliyaText: MakeAliyaTextUseCase,
-    private val userPreferences: DataStoreRepository
+    private val userPreferences: DataStoreRepository,
+    private val sharedPreferencesRepository: SharedPreferencesRepository
 ): ViewModel() {
 
     private var bookIndex = 0
     private var parashaIndex = 0
     private var aliyaIndex = 0
+    private var scrollOffset = 0
     private var isConnectedParashas = false
 
     private val _uiState = MutableStateFlow(UiState())
@@ -41,6 +40,7 @@ class MainViewModel @Inject constructor(
                 bookIndex = details[0].toInt()
                 parashaIndex = details[1].toInt()
                 aliyaIndex = details[2].toInt()
+                scrollOffset = sharedPreferencesRepository.getScrollOffset()
 
                 updateAliya()
 
@@ -62,7 +62,8 @@ class MainViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(
                 aliyaText = makeAliyaText.makeText(bookIndex, parashaIndex, aliyaIndex),
-                state = UiState.State.Fetched
+                state = UiState.State.Fetched,
+                scrollOffset = scrollOffset
             )
         }
     }
@@ -73,6 +74,12 @@ class MainViewModel @Inject constructor(
                 bookName = humashs[bookIndex]
             )
         }
+    }
+
+    fun saveScrollOffset(scrollOffset: Int = 0) {
+        if (scrollOffset < 0) return
+
+        sharedPreferencesRepository.saveScrollOffset(scrollOffset)
     }
 
     private fun saveAliyaDetails() {
@@ -189,6 +196,7 @@ class MainViewModel @Inject constructor(
         var bookName: String = "",
         var parashaName: String = "",
         var aliyaName: String = "",
+        var scrollOffset: Int = -1,
         var parasha: Parasha? = null,
         var aliyaText: ArrayList<StyledText> = arrayListOf(),
         var state: State = State.Loading

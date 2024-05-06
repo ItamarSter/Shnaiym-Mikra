@@ -1,10 +1,12 @@
 package com.itamarstern.shnaim_mikra.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.itamarstern.shnaim_mikra.local.DataStoreRepository
+import com.itamarstern.shnaim_mikra.local.SharedPreferencesRepository
 import com.itamarstern.shnaim_mikra.network.ApiService
 import dagger.Module
 import dagger.Provides
@@ -46,4 +48,16 @@ class AppModule {
     @Provides
     @Singleton
     fun provideDataStore(@ApplicationContext context: Context) = context.dataStore
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("SharedPreferences", Context.MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferencesRepository(sharedPreferences: SharedPreferences): SharedPreferencesRepository {
+        return SharedPreferencesRepository(sharedPreferences)
+    }
 }

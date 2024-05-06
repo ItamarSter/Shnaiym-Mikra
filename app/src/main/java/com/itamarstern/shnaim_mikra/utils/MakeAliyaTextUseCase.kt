@@ -24,9 +24,23 @@ class MakeAliyaTextUseCase @Inject constructor() {
         if (startPerekIndex == endPerekIndex) {
             aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
             makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
+            aliyaTextList.add(StyledText("\n\n", false))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
+            makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
             aliyaTextList.add(StyledText("\n\nתרגום\n", true))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
             makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, onkelosText)
         } else {
+            makeMultiplePereksAliya(
+                startPerekIndex,
+                endPerekIndex,
+                aliyaTextList,
+                startPasukIndex,
+                bookIndex,
+                endPasukIndex,
+                torahText
+            )
+            aliyaTextList.add(StyledText("\n\n", false))
             makeMultiplePereksAliya(
                 startPerekIndex,
                 endPerekIndex,
