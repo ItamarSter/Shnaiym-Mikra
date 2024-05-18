@@ -102,11 +102,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onBookBackClick() {
+    fun onBookBackClick(goToLastParasha: Boolean = false, goToLastAliya: Boolean = false) {
         if (bookIndex > 0) {
             onLoading()
             bookIndex--
-            resetParasha()
+            resetParasha(if (goToLastParasha) parashas[bookIndex].size - 1 else parashaIndex, goToLastAliya)
         }
     }
 
@@ -120,13 +120,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onParashaBackClick() {
+    fun onParashaBackClick(goToLastAliya: Boolean = false) {
         if (parashaIndex > 0) {
             onLoading()
             parashaIndex--
-            resetAliya()
+            resetAliya(if (goToLastAliya) 6 else 0)
         } else {
-            onBookBackClick()
+            onBookBackClick(true, goToLastAliya)
         }
     }
 
@@ -146,7 +146,7 @@ class MainViewModel @Inject constructor(
             aliyaIndex--
             saveAliyaDetails()
         } else {
-            onParashaBackClick()
+            onParashaBackClick(true)
         }
     }
 
@@ -167,13 +167,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun resetParasha() {
-        parashaIndex = 0
-        resetAliya()
+    private fun resetParasha(parashaIndex: Int = 0, goToLastAliya: Boolean = false) {
+        this.parashaIndex = parashaIndex
+        resetAliya(if (goToLastAliya) 6 else 0)
     }
 
-    private fun resetAliya() {
-        aliyaIndex = 0
+    private fun resetAliya(aliyaIndex: Int = 0) {
+        this.aliyaIndex = aliyaIndex
         saveAliyaDetails()
     }
 
