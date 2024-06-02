@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -50,7 +51,9 @@ fun SettingsScreen(
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = colorResource(id = R.color.brown2))
         ) {
             IconButton(onClick = { viewModel.onIncreaseFontClick() }) {
                 Icon(modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.plus), contentDescription = "הגדלה")
@@ -61,6 +64,22 @@ fun SettingsScreen(
             )
             IconButton(onClick = { viewModel.onDecreaseFontClick() }) {
                 Icon(modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.minus), contentDescription = "הקטנה")
+            }
+        }
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = colorResource(id = R.color.brown2))
+        ) {
+            Text(
+                text = "סוג תרגום"
+            )
+            Button(onClick = { viewModel.onTargumChangeClicked() }) {
+                Text(
+                    text = if (uiState.activeTargum == MainViewModel.UiState.Targum.ONKELOS) "אונקלוס" else "רש״י"
+                )
             }
         }
     }

@@ -56,12 +56,21 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            userPreferences.getTargumFlow().collect { targum ->
+                _uiState.update { state ->
+                    state.copy(activeTargum = targum)
+                }
+                updateAliya()
+            }
+        }
     }
 
     private fun updateAliya() {
         _uiState.update { state ->
             state.copy(
-                aliyaText = makeAliyaText.makeText(bookIndex, parashaIndex, aliyaIndex),
+                aliyaText = makeAliyaText.makeText(bookIndex, parashaIndex, aliyaIndex, state.activeTargum),
                 state = UiState.State.Fetched,
                 scrollOffset = scrollOffset
             )
@@ -191,7 +200,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun onTargumChangeClicked() {
+        viewModelScope.launch {
+            userPreferences.setTargum(if (uiState.value.activeTargum == UiState.Targum.ONKELOS) UiState.Targum.RASHI else UiState.Targum.ONKELOS)
+        }
+    }
+
     data class UiState (
+        var activeTargum: Targum = Targum.ONKELOS,
         var fontSize: Int = DataStoreRepository.DEFAULT_FONT_SIZE,
         var bookName: String = "",
         var parashaName: String = "",
@@ -203,6 +219,10 @@ class MainViewModel @Inject constructor(
     ) {
         enum class State {
             Loading, Fetched, Failure
+        }
+
+        enum class Targum (val index: Int){
+            RASHI(0), ONKELOS(1)
         }
     }
 }

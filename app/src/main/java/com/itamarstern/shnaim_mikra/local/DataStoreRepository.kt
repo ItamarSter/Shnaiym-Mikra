@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.itamarstern.shnaim_mikra.MainViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -28,6 +29,20 @@ class DataStoreRepository @Inject constructor(
             preferences[KEY_ALIYA_DETAILS] ?: "0,0,0"
         }
 
+    suspend fun setTargum(
+        targum: MainViewModel.UiState.Targum
+    ) {
+        dataStore.edit { preferences ->
+            preferences[KEY_TARGUM] = targum.name
+        }
+    }
+
+    fun getTargumFlow(): Flow<MainViewModel.UiState.Targum> = dataStore.data
+        .map { preferences ->
+            if (preferences[KEY_TARGUM] == MainViewModel.UiState.Targum.RASHI.name) MainViewModel.UiState.Targum.RASHI
+            else MainViewModel.UiState.Targum.ONKELOS
+        }
+
     suspend fun setFontSize(
         fontSize: Int
     ) {
@@ -47,5 +62,6 @@ class DataStoreRepository @Inject constructor(
         const val DEFAULT_FONT_SIZE = 14
         val KEY_ALIYA_DETAILS = stringPreferencesKey("key_aliya_details")
         val KEY_FONT_SIZE = intPreferencesKey("key_font_size")
+        val KEY_TARGUM = stringPreferencesKey("key_targum")
     }
 }
