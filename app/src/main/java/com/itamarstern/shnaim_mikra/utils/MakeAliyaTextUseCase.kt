@@ -29,30 +29,22 @@ class MakeAliyaTextUseCase @Inject constructor() {
 
         if (startPerekIndex == endPerekIndex) {
             aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
-            makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
+            makeOnkelosOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
             aliyaTextList.add(StyledText("\n\n", false))
             aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
-            makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
+            makeOnkelosOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
             aliyaTextList.add(StyledText("\n\nתרגום\n", true))
             aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
             when (targum) {
                 MainViewModel.UiState.Targum.RASHI -> {
-                    var rashi = listOf(listOf(listOf<String>()))
-                    when (bookIndex) {
-                        0 -> rashi = rashiBereshit
-                        1 -> rashi = rashiShmot
-                        2 -> rashi = rashiVaykra
-                        3 -> rashi = rashiBamidbar
-                        4 -> rashi = rashiDvarim
-                    }
-                    makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, rashi, targum)
+                    makeRashiOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList)
                 }
                 MainViewModel.UiState.Targum.ONKELOS -> {
-                    makeOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, onkelosText, targum)
+                    makeOnkelosOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, onkelosText)
                 }
             }
         } else {
-            makeMultiplePereksAliya(
+            makeOnkelosMultiplePereksAliya(
                 startPerekIndex,
                 endPerekIndex,
                 aliyaTextList,
@@ -62,7 +54,7 @@ class MakeAliyaTextUseCase @Inject constructor() {
                 torahText
             )
             aliyaTextList.add(StyledText("\n\n", false))
-            makeMultiplePereksAliya(
+            makeOnkelosMultiplePereksAliya(
                 startPerekIndex,
                 endPerekIndex,
                 aliyaTextList,
@@ -74,35 +66,24 @@ class MakeAliyaTextUseCase @Inject constructor() {
             aliyaTextList.add(StyledText("\n\nתרגום\n", true))
             when (targum) {
                 MainViewModel.UiState.Targum.RASHI -> {
-                    var rashi = listOf(listOf(listOf<String>()))
-                    when (bookIndex) {
-                        0 -> rashi = rashiBereshit
-                        1 -> rashi = rashiShmot
-                        2 -> rashi = rashiVaykra
-                        3 -> rashi = rashiBamidbar
-                        4 -> rashi = rashiDvarim
-                    }
-                    makeMultiplePereksAliya(
+                    makeRashiMultiplePereksAliya(
                         startPerekIndex,
                         endPerekIndex,
                         aliyaTextList,
                         startPasukIndex,
                         bookIndex,
-                        endPasukIndex,
-                        rashi,
-                        targum
+                        endPasukIndex
                     )
                 }
                 MainViewModel.UiState.Targum.ONKELOS -> {
-                    makeMultiplePereksAliya(
+                    makeOnkelosMultiplePereksAliya(
                         startPerekIndex,
                         endPerekIndex,
                         aliyaTextList,
                         startPasukIndex,
                         bookIndex,
                         endPasukIndex,
-                        onkelosText,
-                        targum
+                        onkelosText
                     )
                 }
             }
@@ -110,15 +91,14 @@ class MakeAliyaTextUseCase @Inject constructor() {
         return aliyaTextList
     }
 
-    private fun makeMultiplePereksAliya(
+    private fun makeOnkelosMultiplePereksAliya(
         startPerekIndex: Int,
         endPerekIndex: Int,
         aliyaTextList: ArrayList<StyledText>,
         startPasukIndex: Int,
         bookIndex: Int,
         endPasukIndex: Int,
-        textSource: List<List<List<String>>>,
-        targum: MainViewModel.UiState.Targum? = null
+        textSource: List<List<List<String>>>
     ) {
         for (i in startPerekIndex..endPerekIndex) {
             val perekSB = StringBuilder()
@@ -126,88 +106,125 @@ class MakeAliyaTextUseCase @Inject constructor() {
             if (i == startPerekIndex) {
                 for (j in startPasukIndex until textSource[bookIndex][i].size) {
                     perekSB.append(psukimOrPrakim[j])
-                    targum?.let {
-                        when (targum) {
-                            MainViewModel.UiState.Targum.RASHI -> {
-                                for (rashiDiburHamathil in textSource[i][j]) {
-                                    perekSB.append("${rashiDiburHamathil}\n")
-                                }
-                            }
-                            MainViewModel.UiState.Targum.ONKELOS -> {
-                                perekSB.append("${textSource[bookIndex][i][j]}\n")
-                            }
-                        }
-                    } ?: run {
-                        perekSB.append("${textSource[bookIndex][i][j]}\n")
-                    }
+                    perekSB.append("${textSource[bookIndex][i][j]}\n")
                 }
             } else if (i == endPerekIndex) {
                 for (j in 0..endPasukIndex) {
                     perekSB.append(psukimOrPrakim[j])
-                    targum?.let {
-                        when (targum) {
-                            MainViewModel.UiState.Targum.RASHI -> {
-                                for (rashiDiburHamathil in textSource[i][j]) {
-                                    perekSB.append("${rashiDiburHamathil}\n")
-                                }
-                            }
-                            MainViewModel.UiState.Targum.ONKELOS -> {
-                                perekSB.append("${textSource[bookIndex][i][j]}\n")
-                            }
-                        }
-                    } ?: run {
-                        perekSB.append("${textSource[bookIndex][i][j]}\n")
-                    }
+                    perekSB.append("${textSource[bookIndex][i][j]}\n")
                 }
             } else {
                 for (j in 0 until textSource[bookIndex][i].size) {
                     perekSB.append(psukimOrPrakim[j])
-                    targum?.let {
-                        when (it) {
-                            MainViewModel.UiState.Targum.RASHI -> {
-                                for (rashiDiburHamathil in textSource[i][j]) {
-                                    perekSB.append("${rashiDiburHamathil}\n")
-                                }
-                            }
-                            MainViewModel.UiState.Targum.ONKELOS -> {
-                                perekSB.append("${textSource[bookIndex][i][j]}\n")
-                            }
-                        }
-                    } ?: run {
-                        perekSB.append("${textSource[bookIndex][i][j]}\n")
-                    }
+                    perekSB.append("${textSource[bookIndex][i][j]}\n")
                 }
             }
             aliyaTextList.add(StyledText(perekSB.toString().removeHtml(), false))
         }
     }
 
-    private fun makeOnePerekAliya(
+    private fun makeRashiMultiplePereksAliya(
+        startPerekIndex: Int,
+        endPerekIndex: Int,
+        aliyaTextList: ArrayList<StyledText>,
+        startPasukIndex: Int,
+        bookIndex: Int,
+        endPasukIndex: Int
+    ) {
+        var rashi = listOf(listOf(listOf<String>()))
+        when (bookIndex) {
+            0 -> rashi = rashiBereshit
+            1 -> rashi = rashiShmot
+            2 -> rashi = rashiVaykra
+            3 -> rashi = rashiBamidbar
+            4 -> rashi = rashiDvarim
+        }
+        for (i in startPerekIndex..endPerekIndex) {
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[i] + "\n", true))
+            if (i == startPerekIndex) {
+                for (j in startPasukIndex until rashi[bookIndex][i].size) {
+                    if (rashi[i][j].isNotEmpty()) {
+                        aliyaTextList.add(StyledText(psukimOrPrakim[j] + "\n", false))
+                        for (rashiDiburHamathil in rashi[i][j]) {
+                            val regex = Regex("</b>")
+                            val matchResult = regex.find(rashiDiburHamathil)
+                            val startOfRashiItselfIndex = matchResult!!.range.last + 1
+                            aliyaTextList.add(StyledText(rashiDiburHamathil.substring(0, startOfRashiItselfIndex).removeHtml(), true))
+                            aliyaTextList.add(StyledText(rashiDiburHamathil.substring(startOfRashiItselfIndex).removeHtml() + "\n", false))
+                        }
+                    }
+                }
+            } else if (i == endPerekIndex) {
+                for (j in 0..endPasukIndex) {
+                    if (rashi[i][j].isNotEmpty()) {
+                        aliyaTextList.add(StyledText(psukimOrPrakim[j] + "\n", false))
+                        for (rashiDiburHamathil in rashi[i][j]) {
+                            val regex = Regex("</b>")
+                            val matchResult = regex.find(rashiDiburHamathil)
+                            val startOfRashiItselfIndex = matchResult!!.range.last + 1
+                            aliyaTextList.add(StyledText(rashiDiburHamathil.substring(0, startOfRashiItselfIndex).removeHtml(), true))
+                            aliyaTextList.add(StyledText(rashiDiburHamathil.substring(startOfRashiItselfIndex).removeHtml() + "\n", false))
+                        }
+                    }
+                }
+            } else {
+                for (j in 0 until rashi[bookIndex][i].size) {
+                    if (rashi[i][j].isNotEmpty()) {
+                        aliyaTextList.add(StyledText(psukimOrPrakim[j] + "\n", false))
+                        for (rashiDiburHamathil in rashi[i][j]) {
+                            val regex = Regex("</b>")
+                            val matchResult = regex.find(rashiDiburHamathil)
+                            val startOfRashiItselfIndex = matchResult!!.range.last + 1
+                            aliyaTextList.add(StyledText(rashiDiburHamathil.substring(0, startOfRashiItselfIndex).removeHtml(), true))
+                            aliyaTextList.add(StyledText(rashiDiburHamathil.substring(startOfRashiItselfIndex).removeHtml() + "\n", false))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun makeRashiOnePerekAliya(
+        startPasukIndex: Int,
+        endPasukIndex: Int,
+        bookIndex: Int,
+        startPerekIndex: Int,
+        aliyaTextList: ArrayList<StyledText>
+    ) {
+        var rashi = listOf(listOf(listOf<String>()))
+        when (bookIndex) {
+            0 -> rashi = rashiBereshit
+            1 -> rashi = rashiShmot
+            2 -> rashi = rashiVaykra
+            3 -> rashi = rashiBamidbar
+            4 -> rashi = rashiDvarim
+        }
+        for (i in startPasukIndex..endPasukIndex) {
+            if (rashi[startPerekIndex][i].isNotEmpty()) {
+                aliyaTextList.add(StyledText(psukimOrPrakim[i] + "\n", false))
+                for (rashiDiburHamathil in rashi[startPerekIndex][i]) {
+                    val regex = Regex("</b>")
+                    val matchResult = regex.find(rashiDiburHamathil)
+                    val startOfRashiItselfIndex = matchResult!!.range.last + 1
+                    aliyaTextList.add(StyledText(rashiDiburHamathil.substring(0, startOfRashiItselfIndex).removeHtml(), true))
+                    aliyaTextList.add(StyledText(rashiDiburHamathil.substring(startOfRashiItselfIndex).removeHtml() + "\n", false))
+                }
+            }
+        }
+    }
+
+    private fun makeOnkelosOnePerekAliya(
         startPasukIndex: Int,
         endPasukIndex: Int,
         bookIndex: Int,
         startPerekIndex: Int,
         aliyaTextList: ArrayList<StyledText>,
-        textSource: List<List<List<String>>>,
-        targum: MainViewModel.UiState.Targum? = null
+        textSource: List<List<List<String>>>
     ) {
         val perekSB = StringBuilder()
         for (i in startPasukIndex..endPasukIndex) {
             perekSB.append(psukimOrPrakim[i])
-            targum?.let {
-                when (it) {
-                    MainViewModel.UiState.Targum.RASHI -> {
-                        for (rashiDiburHamathil in textSource[startPerekIndex][i]) {
-                            perekSB.append("${rashiDiburHamathil}\n")
-                        }
-                    }
-                    MainViewModel.UiState.Targum.ONKELOS -> {
-                        perekSB.append("${textSource[bookIndex][startPerekIndex][i]}\n")
-                    }
-                }
-            } ?: run {
-                perekSB.append("${textSource[bookIndex][startPerekIndex][i]}\n")
-            }
+            perekSB.append("${textSource[bookIndex][startPerekIndex][i]}\n")
         }
         aliyaTextList.add(StyledText(perekSB.toString().removeHtml(), false))
     }
