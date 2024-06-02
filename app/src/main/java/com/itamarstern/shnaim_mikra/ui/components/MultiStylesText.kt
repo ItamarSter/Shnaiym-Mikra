@@ -23,10 +23,27 @@ fun MultiStylesText(
         style = TextStyle(textDirection = TextDirection.Rtl, fontSize = textSize.sp),
         text = buildAnnotatedString {
             textData.forEach { styledText ->
-                if (styledText.bold) {
+                if (styledText.bold && !styledText.bigger) {
                     withStyle(
                         style = SpanStyle(
                             fontWeight = FontWeight.Bold
+                        ),
+                    ) {
+                        append(styledText.text)
+                    }
+                } else if (styledText.bold && styledText.bigger) {
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (textSize + 4).sp
+                        ),
+                    ) {
+                        append(styledText.text)
+                    }
+                } else if (!styledText.bold && styledText.bigger) {
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = (textSize + 4).sp
                         ),
                     ) {
                         append(styledText.text)

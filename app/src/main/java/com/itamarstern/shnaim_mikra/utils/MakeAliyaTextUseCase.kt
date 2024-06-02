@@ -28,13 +28,13 @@ class MakeAliyaTextUseCase @Inject constructor() {
         val aliyaTextList = ArrayList<StyledText>()
 
         if (startPerekIndex == endPerekIndex) {
-            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true, bigger = true))
             makeOnkelosOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
             aliyaTextList.add(StyledText("\n\n", false))
-            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true, bigger = true))
             makeOnkelosOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList, torahText)
             aliyaTextList.add(StyledText("\n\nתרגום\n", true))
-            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[startPerekIndex] + "\n", true, bigger = true))
             when (targum) {
                 MainViewModel.UiState.Targum.RASHI -> {
                     makeRashiOnePerekAliya(startPasukIndex, endPasukIndex, bookIndex, startPerekIndex, aliyaTextList)
@@ -102,7 +102,7 @@ class MakeAliyaTextUseCase @Inject constructor() {
     ) {
         for (i in startPerekIndex..endPerekIndex) {
             val perekSB = StringBuilder()
-            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[i] + "\n", true))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[i] + "\n", true, bigger = true))
             if (i == startPerekIndex) {
                 for (j in startPasukIndex until textSource[bookIndex][i].size) {
                     perekSB.append(psukimOrPrakim[j])
@@ -140,10 +140,10 @@ class MakeAliyaTextUseCase @Inject constructor() {
             4 -> rashi = rashiDvarim
         }
         for (i in startPerekIndex..endPerekIndex) {
-            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[i] + "\n", true))
+            aliyaTextList.add(StyledText("פרק " + psukimOrPrakim[i] + "\n", true, bigger = true))
             if (i == startPerekIndex) {
-                for (j in startPasukIndex until rashi[bookIndex][i].size) {
-                    if (rashi[i][j].isNotEmpty()) {
+                for (j in startPasukIndex until rashi[i].size) {
+                    if (rashi[i].size > j && rashi[i][j].isNotEmpty()) {
                         aliyaTextList.add(StyledText(psukimOrPrakim[j] + "\n", false))
                         for (rashiDiburHamathil in rashi[i][j]) {
                             val regex = Regex("</b>")
@@ -156,7 +156,7 @@ class MakeAliyaTextUseCase @Inject constructor() {
                 }
             } else if (i == endPerekIndex) {
                 for (j in 0..endPasukIndex) {
-                    if (rashi[i][j].isNotEmpty()) {
+                    if (rashi[i].size > j && rashi[i][j].isNotEmpty()) {
                         aliyaTextList.add(StyledText(psukimOrPrakim[j] + "\n", false))
                         for (rashiDiburHamathil in rashi[i][j]) {
                             val regex = Regex("</b>")
@@ -168,8 +168,8 @@ class MakeAliyaTextUseCase @Inject constructor() {
                     }
                 }
             } else {
-                for (j in 0 until rashi[bookIndex][i].size) {
-                    if (rashi[i][j].isNotEmpty()) {
+                for (j in 0 until rashi[i].size) {
+                    if (rashi[i].size > j && rashi[i][j].isNotEmpty()) {
                         aliyaTextList.add(StyledText(psukimOrPrakim[j] + "\n", false))
                         for (rashiDiburHamathil in rashi[i][j]) {
                             val regex = Regex("</b>")
@@ -200,7 +200,7 @@ class MakeAliyaTextUseCase @Inject constructor() {
             4 -> rashi = rashiDvarim
         }
         for (i in startPasukIndex..endPasukIndex) {
-            if (rashi[startPerekIndex][i].isNotEmpty()) {
+            if (rashi[startPerekIndex].size > i && rashi[startPerekIndex][i].isNotEmpty()) {
                 aliyaTextList.add(StyledText(psukimOrPrakim[i] + "\n", false))
                 for (rashiDiburHamathil in rashi[startPerekIndex][i]) {
                     val regex = Regex("</b>")

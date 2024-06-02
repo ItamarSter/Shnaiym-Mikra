@@ -115,7 +115,7 @@ class MainViewModel @Inject constructor(
         if (bookIndex > 0) {
             onLoading()
             bookIndex--
-            resetParasha(if (goToLastParasha) parashas[bookIndex].size - 1 else parashaIndex, goToLastAliya)
+            resetParasha(if (goToLastParasha) parashas[bookIndex].size - 1 else 0, goToLastAliya)
         }
     }
 
