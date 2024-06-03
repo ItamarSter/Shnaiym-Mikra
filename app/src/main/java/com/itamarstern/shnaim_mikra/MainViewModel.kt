@@ -29,6 +29,7 @@ class MainViewModel @Inject constructor(
     private var aliyaIndex = 0
     private var scrollOffset = 0
     private var isConnectedParashas = false
+    private var targum = UiState.Targum.ONKELOS
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState
@@ -40,6 +41,12 @@ class MainViewModel @Inject constructor(
                 bookIndex = details[0].toInt()
                 parashaIndex = details[1].toInt()
                 aliyaIndex = details[2].toInt()
+                isConnectedParashas = details[3].toInt() == 1
+                targum = when (details[4].toInt()) {
+                    UiState.Targum.ONKELOS.index -> UiState.Targum.ONKELOS
+                    UiState.Targum.RASHI.index -> UiState.Targum.RASHI
+                    else -> UiState.Targum.ONKELOS
+                }
                 scrollOffset = sharedPreferencesRepository.getScrollOffset()
 
                 updateAliya()
@@ -56,21 +63,14 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
-
-        viewModelScope.launch {
-            userPreferences.getTargumFlow().collect { targum ->
-                _uiState.update { state ->
-                    state.copy(activeTargum = targum)
-                }
-                updateAliya()
-            }
-        }
     }
 
     private fun updateAliya() {
         _uiState.update { state ->
             state.copy(
-                aliyaText = makeAliyaText.makeText(bookIndex, parashaIndex, aliyaIndex, state.activeTargum),
+                activeTargum = targum,
+                isConnected = isConnectedParashas,
+                aliyaText = makeAliyaText.makeText(bookIndex, parashaIndex, aliyaIndex, targum, isConnectedParashas && parashas[bookIndex][parashaIndex].canBeConnected),
                 state = UiState.State.Fetched,
                 scrollOffset = scrollOffset
             )
@@ -93,7 +93,7 @@ class MainViewModel @Inject constructor(
 
     private fun saveAliyaDetails() {
         viewModelScope.launch {
-            userPreferences.setAliyaDetails(bookIndex, parashaIndex, aliyaIndex)
+            userPreferences.setAliyaDetails(bookIndex, parashaIndex, aliyaIndex, isConnectedParashas, targum)
         }
     }
 
@@ -123,6 +123,14 @@ class MainViewModel @Inject constructor(
         if (parashaIndex < parashas[bookIndex].size - 1) {
             onLoading()
             parashaIndex++
+            if (isConnectedParashas &&
+                parashas[bookIndex][parashaIndex].canBeConnected &&
+                parashas[bookIndex][parashaIndex - 1].canBeConnected &&
+                parashas[bookIndex][parashaIndex].connectedIndex ==
+                parashas[bookIndex][parashaIndex - 1].connectedIndex) {
+                onParashaForwardClick()
+                return
+            }
             resetAliya()
         } else {
             onBookForwardClick()
@@ -133,6 +141,14 @@ class MainViewModel @Inject constructor(
         if (parashaIndex > 0) {
             onLoading()
             parashaIndex--
+            if (isConnectedParashas &&
+                parashas[bookIndex][parashaIndex].canBeConnected &&
+                parashas[bookIndex][parashaIndex + 1].canBeConnected &&
+                parashas[bookIndex][parashaIndex].connectedIndex ==
+                parashas[bookIndex][parashaIndex + 1].connectedIndex) {
+                onParashaBackClick()
+                return
+            }
             resetAliya(if (goToLastAliya) 6 else 0)
         } else {
             onBookBackClick(true, goToLastAliya)
@@ -162,7 +178,7 @@ class MainViewModel @Inject constructor(
     private fun updateParashaName() {
         _uiState.update {
             it.copy(
-                parashaName = if (isConnectedParashas) parashas[bookIndex][parashaIndex].nameIfConnected else parashas[bookIndex][parashaIndex].name,
+                parashaName = if (isConnectedParashas && parashas[bookIndex][parashaIndex].canBeConnected) parashas[bookIndex][parashaIndex].nameIfConnected else parashas[bookIndex][parashaIndex].name,
                 parasha = parashas[bookIndex][parashaIndex]
             )
         }
@@ -201,12 +217,17 @@ class MainViewModel @Inject constructor(
     }
 
     fun onTargumChangeClicked() {
-        viewModelScope.launch {
-            userPreferences.setTargum(if (uiState.value.activeTargum == UiState.Targum.ONKELOS) UiState.Targum.RASHI else UiState.Targum.ONKELOS)
-        }
+        targum = if (targum == UiState.Targum.ONKELOS) UiState.Targum.RASHI else UiState.Targum.ONKELOS
+        saveAliyaDetails()
+    }
+
+    fun connectedParashasClicked() {
+        isConnectedParashas = !isConnectedParashas
+        saveAliyaDetails()
     }
 
     data class UiState (
+        var isConnected: Boolean = false,
         var activeTargum: Targum = Targum.ONKELOS,
         var fontSize: Int = DataStoreRepository.DEFAULT_FONT_SIZE,
         var bookName: String = "",

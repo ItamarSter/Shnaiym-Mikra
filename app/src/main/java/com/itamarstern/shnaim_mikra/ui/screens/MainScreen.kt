@@ -37,6 +37,7 @@ import com.itamarstern.shnaim_mikra.ui.components.FailureText
 import com.itamarstern.shnaim_mikra.ui.components.MultiStylesText
 import com.itamarstern.shnaim_mikra.ui.components.ScreenProgressBar
 import com.itamarstern.shnaim_mikra.ui.components.SelectArea
+import com.itamarstern.shnaim_mikra.ui.components.ToggleView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -118,6 +119,16 @@ fun MainScreen(
                     resetScroll()
                     viewModel.onParashaBackClick()
                 })
+            uiState.parasha?.let {
+                if (it.canBeConnected) {
+                    ToggleView(
+                        isConnected = uiState.isConnected,
+                        onConnectParashasToggled = {
+                            viewModel.connectedParashasClicked()
+                        }
+                    )
+                }
+            }
             SelectArea(
                 modifier = Modifier.background(color = colorResource(id = R.color.brown4)),
                 text1 = uiState.aliyaName,

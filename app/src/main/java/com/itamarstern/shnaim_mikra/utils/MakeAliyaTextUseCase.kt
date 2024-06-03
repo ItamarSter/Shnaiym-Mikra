@@ -2,6 +2,7 @@ package com.itamarstern.shnaim_mikra.utils
 
 import com.itamarstern.shnaim_mikra.MainViewModel
 import com.itamarstern.shnaim_mikra.data.onkelosText
+import com.itamarstern.shnaim_mikra.data.parashas
 import com.itamarstern.shnaim_mikra.data.psukimOrPrakim
 import com.itamarstern.shnaim_mikra.data.rashiBamidbar
 import com.itamarstern.shnaim_mikra.data.rashiBereshit
@@ -16,8 +17,12 @@ import kotlin.text.StringBuilder
 
 class MakeAliyaTextUseCase @Inject constructor() {
 
-    fun makeText(bookIndex: Int, parashaIndex: Int, aliyaIndex: Int, targum: MainViewModel.UiState.Targum): ArrayList<StyledText> {
-        val ref = refs[bookIndex][parashaIndex][aliyaIndex]
+    fun makeText(bookIndex: Int, parashaIndex: Int, aliyaIndex: Int, targum: MainViewModel.UiState.Targum, isConnectedParashas: Boolean): ArrayList<StyledText> {
+        val ref: String = if (isConnectedParashas) {
+            parashas[bookIndex][parashaIndex].refsIfConnected[aliyaIndex]
+        } else {
+            refs[bookIndex][parashaIndex][aliyaIndex]
+        }
         val startPart = ref.substring(0, ref.indexOf('-'))
         val endPart = ref.substring(ref.indexOf('-') + 1)
         val startPerekIndex = startPart.substring(0, startPart.indexOf(':')).toInt() - 1
