@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,7 +46,7 @@ fun SettingsScreen(
                 .background(color = colorResource(id = R.color.brown))
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
-                Icon(imageVector = Icons.Filled.ArrowForward, contentDescription = "חזרה")
+                Icon(tint = Color.Black, imageVector = Icons.Filled.ArrowForward, contentDescription = "חזרה")
             }
         }
         Row(
@@ -56,14 +57,14 @@ fun SettingsScreen(
                 .background(color = colorResource(id = R.color.brown2))
         ) {
             IconButton(onClick = { viewModel.onIncreaseFontClick() }) {
-                Icon(modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.plus), contentDescription = "הגדלה")
+                Icon(tint = Color.Black, modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.plus), contentDescription = "הגדלה")
             }
             Text(
                 text = "גודל טקסט",
-                style = TextStyle(fontSize = uiState.fontSize.sp)
+                style = TextStyle(color = Color.Black, fontSize = uiState.fontSize.sp)
             )
             IconButton(onClick = { viewModel.onDecreaseFontClick() }) {
-                Icon(modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.minus), contentDescription = "הקטנה")
+                Icon(tint = Color.Black, modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.minus), contentDescription = "הקטנה")
             }
         }
         Row(
@@ -74,10 +75,12 @@ fun SettingsScreen(
                 .background(color = colorResource(id = R.color.brown2))
         ) {
             Text(
-                text = "סוג תרגום"
+                text = "סוג תרגום",
+                color = Color.Black
             )
             Button(onClick = { viewModel.onTargumChangeClicked() }) {
                 Text(
+                    color = Color.Black,
                     text = if (uiState.activeTargum == MainViewModel.UiState.Targum.ONKELOS) "אונקלוס" else "רש״י"
                 )
             }

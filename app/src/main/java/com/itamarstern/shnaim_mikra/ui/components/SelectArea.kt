@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDirection
@@ -43,9 +44,11 @@ fun SelectArea(
                         Icon(
                             imageVector = Icons.Rounded.ArrowForward,
                             contentDescription = "back",
+                            tint = Color.Black
                         )
                     }
                     Text(
+                        color = Color.Black,
                         text = text2safe,
                         style = TextStyle(textDirection = TextDirection.Rtl)
                     )
@@ -53,13 +56,14 @@ fun SelectArea(
                 Row (modifier.weight(1f).padding(4.dp, 0.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = text1)
+                    Text(text = text1, color = Color.Black)
                     IconButton(
                         onClick = onForwardClick,
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.ArrowBack,
-                            contentDescription = "forward"
+                            contentDescription = "forward",
+                            tint = Color.Black
                         )
                     }
                 }
@@ -68,15 +72,17 @@ fun SelectArea(
                     Icon(
                         imageVector = Icons.Rounded.ArrowForward,
                         contentDescription = "back",
+                        tint = Color.Black
                     )
                 }
-                Text(text = text1)
+                Text(text = text1, color = Color.Black)
                 IconButton(
                     onClick = onForwardClick,
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.ArrowBack,
-                        contentDescription = "forward"
+                        contentDescription = "forward",
+                        tint = Color.Black
                     )
                 }
             }

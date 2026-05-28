@@ -26,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -83,14 +84,15 @@ fun MainScreen(
 
         ) {
             IconButton(onClick = { navController.navigate("settingsScreen") }) {
-                Icon(imageVector = Icons.Filled.Settings, contentDescription = "הגדרות")
+                Icon(imageVector = Icons.Filled.Settings, contentDescription = "הגדרות", tint = Color.Black)
             }
             IconButton(onClick = { fullScreen = !fullScreen }) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     painter = if (fullScreen) painterResource(id = R.drawable.full_screen) else painterResource(
                         id = R.drawable.exit_full_screen
-                    ), contentDescription = "מסך מלא"
+                    ), contentDescription = "מסך מלא",
+                    tint = Color.Black
                 )
             }
         }
